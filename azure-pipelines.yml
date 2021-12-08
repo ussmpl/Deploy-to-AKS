@@ -42,6 +42,7 @@ stages:
     dependsOn: Build
     variables:
       acrsecret: k8exampleacrauth
+      k8sNamespaceForPR: Deploy-to-AKS
     jobs:
     - job: deploy
       displayName: Deploy to AKS
@@ -54,6 +55,13 @@ stages:
           buildType: 'current'
           artifactName: 'manifests'
           targetPath: '$(Pipeline.Workspace)/manifests'
+      
+      - task: Kubernetes@1
+        displayName: 'Create a new namespace for the pull request'
+        inputs:
+          command: apply
+          useConfigurationFile: true
+          inline: '{ "kind": "Namespace", "apiVersion": "v1", "metadata": { "name": "$(k8sNamespaceForPR)" }}' 
 
       - task: KubernetesManifest@0
         inputs:
